@@ -3,7 +3,7 @@
 <head>
 
 <center>
-<img src="NIA Logo.png" alt="description" align="center" width=100%> <br><br>
+<img class="no-print" src="NIA Logo.png" alt="description" align="center" width=100%> <br><br>
 </center>
 
 
@@ -133,6 +133,8 @@
       <div class="slide"><img src="NIA 1.jpg" alt="Slide 1"></div>
       <div class="slide"><img src="NIA 2.jpg" alt="Slide 2"></div>
       <div class="slide"><img src="NIA 3.jpg" alt="Slide 3"></div>
+      <div class="slide"><img src="NIA 4.png" alt="Slide 4"></div>
+      <div class="slide"><img src="NIA 5.png" alt="Slide 4"></div>
     </div>
     <div class="controls">
       <button class="btn" id="prev">&#10094;</button>
@@ -163,7 +165,7 @@
 
     function resetTimer() {
       if (timer) clearInterval(timer);
-      timer = setInterval(() => showSlide(index + 1), 3000);
+      timer = setInterval(() => showSlide(index + 1), 2000);
     }
 
     document.getElementById("prev").addEventListener("click", () => showSlide(index - 1));
