@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pie Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+</head>
+
+
+<body>
+
+<center>
+<img src="NIA Logo.png" alt="description" align="center" width=100%>
+</center>
+
+<table id="captionTable" style="width:100%; border-collapse:collapse; text-align:center;">
+  <tr>
+    <td style="width:20%;text-align:left;background-color: white;font-size:10px;">Hover mouse cursor over <br>graph to see exact figures</td>
+    <td id="reportName" style="width:50%;font-size:18px;font-weight: bold; font-family: Arial, sans-serif;text-align:center;">caption will come here</td>
+    <td style="width:30%;text-align:center;">
+	      <img onclick="goBackAndRefresh()" src="Back.png" alt="Excel" style="cursor: pointer;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	      <img onclick="document.location='RO.html'" src="Home.png" alt="Excel" style="cursor: pointer;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	</td>
+  </tr>
+</table>
+
+
+
+<script>
+// Function to get query parameter by name
+function getQueryParam(name) {
+    let urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name); // returns value or null
+}
+
+function getQueryParam2(unit) {
+    let urlParams = new URLSearchParams(window.location.search);
+    let rsUnit = urlParams.get(unit); // returns value or null  
+    switch (rsUnit) {
+        case "th":
+            return "Thousands";
+        case "lk":
+            return "Lakhs";
+        case "cr":
+            return "Crores";
+        default:
+            return "Unknown Units";
+    }
+    
+}
+
+// Get variables from URL
+let roName = getQueryParam("name");
+let rsUnit = getQueryParam2("unit");
+
+
+// Use them in innerHTML
+document.getElementById("reportName").innerHTML = "<br>" + roName.slice(0, -2) + " (₹ in " + rsUnit + ")<br><br>";
+</script>
+
+
+<div style="width: 35%; margin: auto;">
+  <canvas id="myPieChart"></canvas>
+</div>
+
+    <script>
+        let categories = JSON.parse(localStorage.getItem("chartCategories"));
+        let values = JSON.parse(localStorage.getItem("chartValues"));
+
+        new Chart(document.getElementById("myPieChart"), {
+            type: 'pie',
+            data: {
+                labels: categories,
+                datasets: [{
+                    data: values,
+                    backgroundColor: [
+                        '#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff'
+                    ]
+                }]
+            },
+options: {
+    responsive: true,
+    maintainAspectRatio: true  // allow CSS/HTML to control size
+  }
+  }
+);
+    </script>
+
+<script>
+     function goBackAndRefresh()
+	 {
+		sessionStorage.setItem('forceReloadPrev', '1');
+		history.go(-1);
+	 }
+</script>
+
+</body>
+</html>

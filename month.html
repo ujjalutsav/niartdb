@@ -1,0 +1,1925 @@
+<! RO.html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Month-wise Premium</title>
+    <script>
+  if (sessionStorage.getItem('forceReloadPrev') === '1') {
+    sessionStorage.removeItem('forceReloadPrev'); // clear first to avoid loops
+    location.reload();
+  }
+</script>
+
+  
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 90%;
+      margin: 20px auto;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 7px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+      cursor: pointer;
+    }
+    th:hover {
+      background-color: #ddd;
+    }
+	@media print {
+      .no-print {
+        display: none !important;
+      }
+    }	
+
+  </style>
+</head>
+<body onload="onLoadSetting()">
+
+<center>
+<img src="NIA Logo.png" alt="description" align="center" width=100%>
+</center>
+
+<table id="captionTable" style="width:100%; border-collapse:collapse; text-align:center;">
+  <tr>
+    <td style="width:20%;text-align:left;background-color: yellow;font-size:10px;">**Set ascending/descending order by<br>clicking on respective column header</td>
+    <td id="reportName" style="width:50%;font-size:18px;font-weight: bold; font-family: Arial, sans-serif;text-align:center;">RO-WISE PREMIUM**</td>
+    <td style="width:30%;text-align:center;">
+	      <img onclick="goBackAndRefresh()" src="Back.png" alt="Excel" style="cursor: pointer;">&nbsp;&nbsp;&nbsp;
+	      <img onclick="document.location='RO.html'" src="Home.png" alt="Excel" style="cursor: pointer;">&nbsp;&nbsp;&nbsp;
+	      <img onclick="downloadPart()" src="Excel.png" alt="Excel" style="cursor: pointer;">&nbsp;&nbsp;&nbsp;
+		  <img onclick="openGraphPage()" src="barChart.png" alt="Bar" style="cursor: pointer;">&nbsp;&nbsp;&nbsp;
+		  <img onclick="makePieChart()" src="pieChart.png" alt="Bar" style="cursor: pointer;">
+	</td>
+  </tr>
+</table>
+
+<script>
+// Function to get query parameter by name
+function getQueryParam(name) {
+    let urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name); // returns value or null
+}
+
+// Get variables from URL
+let roName = getQueryParam("name");
+
+// Use them in innerHTML
+document.getElementById("reportName").innerHTML = "MONTH-WISE PREMIUM REPORT - " + roName + "**";
+</script>
+
+
+
+<table id="Filter" width="90%" style="background-color: red; border: 1px solid black;">
+  <thead>
+    <tr >
+
+      	<th id="cellDept" style="text-align: center; background-color: #ff9933;" >Dept 		
+	    <select id="dept" onchange="setPolicyDropDown()">
+        	<option value="all">All Dept</option>
+        	<option value="fire">Fire</option>
+        	<option value="motor">Motor</option>
+      	  	<option value="marine">Marine</option>
+        	<option value="health">Health</option>
+        	<option value="misc">Misc</option>
+    	    </select>
+	</th>
+
+      	<th id="cellPolicy" style="text-align: center; background-color: #ff9933;">Policy 		
+		<select id="policy" onchange="setTableValues(this.value)" >
+        		<option value="all">All Policies</option>
+    		</select>
+	</th>
+
+      <th id="cellFromMonth" style="text-align: center; background-color: #ff9933;">From 
+		<select id="fromMonth" name="Monyj" disabled>
+			  <option value="all">April 25</option>
+		</select>      
+      </th>
+      <th id="cellToMonth" style="text-align: center; background-color: #ff9933;">To 
+		<select id="toMonth" name="Month2" onchange="setTableValues()" disabled>
+			  <option value="apr">April 25</option>
+			  <option value="may">May 25</option>
+			  <option value="jun">Jun 25</option>
+			  <option value="jul">Jul 25</option>`
+			  <option value="aug" selected>Aug 25</option>
+		</select>
+      </th>
+      <th id="cellChannel" style="text-align: center; background-color: #ff9933;">Channel 
+		<select id="channel" name="Channel" onchange="setTableValues()" >
+			  <option value="all">All</option>
+			  <option value="direct">Direct</option>
+			  <option value="devsrc">Dev.Off</option>
+			  <option value="broker">Broker</option>
+			  <option value="agent">Agents</option>
+			  <option value="pos">POS</option>
+		</select>
+      </th>
+      <th id="cellSource" style="text-align: center; background-color: #ff9933;">Source 
+		<select id="source" name="source" onchange="setTableValues()" >
+			  <option value="all">All</option>
+			  <option value="office">Office</option>
+			  <option value="portal">Portal</option>
+			  <option value="polbazar">Pol.Bazar</option>
+			  <option value="maruti">Maruti</option>
+			  <option value="tata">Tata Mot</option>
+		</select>
+      </th>
+      <th id="cellRsUnit" style="text-align: center; background-color: #ff9933;">₹ in 
+		<select id="RsUnit" name="RsUnit" onchange="setTableValues(this.value)">
+			  <option value="th">Thousands</option>
+			  <option value="lk">Lakhs</option>
+			  <option value="cr" selected>Crores</option>
+		</select>
+      </th>
+      <th style="text-align: center; background-color: #ff9933;">F.Y. 
+		<select id="FY" name="FY">
+			  <option value="curr">2025-26</option>
+		</select>
+      </th>
+
+    </tr>
+  </thead>
+</table>
+
+
+<table id="dataTable">
+  <thead>
+    <tr>
+      <th onclick="sortTable(0)" >%-age <br>Share</th>
+      <th onclick="sortTable(1)">Month/Year</br></th>
+      <th onclick="sortTable(2)" style="text-align: center;">Premium<br>2024-25</br></th>
+      <th onclick="sortTable(3)" style="text-align: center;">Premium <br>2025-26</br></th>
+      <th onclick="sortTable(4)" style="text-align: center;">Accretion<br>Amount</th>
+      <th onclick="sortTable(5)" style="text-align: center;">%-age<br>Growth</th>
+      <th onclick="sortTable(6)" style="text-align: center;">ICR<br> 2024-25</th>
+      <th onclick="sortTable(7)" style="text-align: center;">ICR<br>2025-26</th>
+	  <th style="text-align: center;" colspan=6>Drill Down</th>
+    </tr>
+  </thead>
+<!---  <tbody>   --->
+
+<tbody id="tableBody">
+
+<tr><td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> </tr>
+<tr><td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> </tr>
+<tr><td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> </tr>
+<tr><td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> </tr>
+<tr><td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> </tr>
+
+</tbody>
+<tr style="background-color: grey; font-weight: bold;"><td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> </tr>
+
+</table>
+
+
+<script>
+  const sortDirections = {};
+
+  function sortTable(colIndex) {
+    const table = document.getElementById("dataTable");
+    const tbody = document.getElementById("tableBody");
+    const headers = table.querySelectorAll("thead th");
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+
+    // Toggle direction
+    const currentDir = sortDirections[colIndex] || "asc";
+    const newDir = currentDir === "asc" ? "desc" : "asc";
+    sortDirections[colIndex] = newDir;
+
+    // Clear previous arrows
+    headers.forEach((th, i) => {
+      const text = th.innerText.replace(/[\u2191\u2193]/g, '').trim();
+      th.innerText = text;
+    });
+
+    // Add arrow to the sorted column
+    const arrow = newDir === "asc" ? " ↑" : " ↓";
+    headers[colIndex].innerText += arrow;
+
+    // Sort the rows
+    rows.sort((a, b) => {
+      let valA = a.cells[colIndex].innerText.trim();
+      let valB = b.cells[colIndex].innerText.trim();
+
+      valA = isNaN(valA) ? valA.toLowerCase() : parseFloat(valA);
+      valB = isNaN(valB) ? valB.toLowerCase() : parseFloat(valB);
+
+      if (valA < valB) return newDir === "asc" ? -1 : 1;
+      if (valA > valB) return newDir === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    // Rebuild tbody
+    tbody.innerHTML = "";
+    rows.forEach(row => tbody.appendChild(row));
+  }
+</script>
+
+<script>
+  function loadPage(page) {
+    if (page !== "#") {
+      window.location.href = page;
+    }
+  }
+</script>
+
+<script>
+function setDeptValue() 
+{
+
+
+    var action = document.getElementById("dept").value;
+    var table = document.getElementById("dataTable");
+
+    if (action === "fire") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; 
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.05).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.05).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0502).toFixed(2); }}
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 21.43).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "motor") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.42).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.42).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.417).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 1.43).toFixed(2); }
+                    }
+        }
+    }
+
+
+    if (action === "marine") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.02).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.02).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0204).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 3.05).toFixed(2); }
+                    }
+        }
+    }
+
+
+    if (action === "health") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.44).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.44).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.437).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 9.65).toFixed(2); }
+                    }
+        }
+    }
+    
+
+    if (action === "misc") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.07).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.07).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0704).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 2.05).toFixed(2); }
+                    }
+        }
+    }
+
+
+}
+</script>
+
+
+<script>
+function setPolicyValue() 
+{
+
+   var action = document.getElementById("policy").value;
+    var table = document.getElementById("dataTable");
+
+// HEALTH
+    if (action === "Mediclaim") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.38).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.38).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.3802).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 11.43).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "Cancer Policy") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.02).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.02).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0202).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 1.43).toFixed(2); }
+                    }
+        }
+    }
+
+
+    if (action === "Group Policy") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.60).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.60).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.601).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 11.05).toFixed(2); }
+                    }
+        }
+    }
+//MOTOR
+    if (action === "Motor OD") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.40).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.40).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.397).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 1.05).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "Motor TP") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.60).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.60).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.601).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 21.05).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "Goods Carry.") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.36).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.36).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.359).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 11.35).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "Pass Carrying") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.29).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.29).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.2905).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 6.72).toFixed(2); }
+                    }
+        }
+    }
+//Spl Vehicle
+    if (action === "Spl Vehicle") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.06).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.06).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0593).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 6.72).toFixed(2); }
+                    }
+        }
+    }
+
+//PVT CAR
+    if (action === "Pvt Car") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.12).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.12).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.1204).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 3.92).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "2-Wheeler") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.07).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.07).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0694).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 1.34).toFixed(2); }
+                    }
+        }
+    }
+
+
+// MARINE
+    if (action === "Cargo") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.76).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.76).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.7603).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 3.05).toFixed(2); }
+                    }
+        }
+    }
+    if (action === "Hull") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.24).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.24).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.2395).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 21.05).toFixed(2); }
+                    }
+        }
+    }
+
+
+// FIRE
+    if (action === "Std Fire") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.76).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.76).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.7604).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 18.21).toFixed(2); }
+                    }
+        }
+    }
+    if (action === "Fire LOP") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.24).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.24).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.2393).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 19.05).toFixed(2); }
+                    }
+        }
+    }
+
+
+
+
+// MISC
+    if (action === "Rural") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.04).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.04).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0378).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 6.21).toFixed(2); }
+                    }
+        }
+    }
+    if (action === "Liability") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.038).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.038).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.039).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 4.05).toFixed(2); }
+                    }
+        }
+    }
+    if (action === "House Holders") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.023).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.023).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0236).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 4.05).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "Shopkeepers") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.021).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.021).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.020).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 4.05).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "Doctors Ind.") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.012).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.012).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.015).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 4.05).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "Travel Ins") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.012).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.01).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.009).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 4.05).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "Sports Ins") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.012).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0098).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0079).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 4.05).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "Prof.Ind.") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.012).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.012).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.013).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 4.05).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "Engg") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.012).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.03).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.032).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 4.05).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "Sp.Cont.Pol") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.012).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.07).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.079).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 4.05).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "Long Term Fire") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.04).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0945).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0938).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 6.21).toFixed(2); }
+                    }
+        }
+    }
+
+
+    if (action === "Inland Trns") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.04).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.12).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.118).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 6.21).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "Foreign Trn") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.04).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.08).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.079).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 6.21).toFixed(2); }
+                    }
+        }
+    }
+
+
+    if (action === "Open Policy") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.04).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.002).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.00276).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 6.21).toFixed(2); }
+                    }
+        }
+    }
+    if (action === "Med.Top-up") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.04).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.054).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.059).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 6.21).toFixed(2); }
+                    }
+        }
+    }
+
+
+
+}
+</script>
+
+
+<script>
+function setRsValue() 
+{
+   var action = document.getElementById("RsUnit").value;
+   var table = document.getElementById("dataTable");
+
+    if (action === "th") 
+    {
+    for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value).toFixed(2); }
+                    }
+        }
+    }
+
+
+
+    if (action === "lk") 
+    {
+      
+  for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value / 100).toFixed(2); }
+                    }
+        }
+    }
+
+    if (action === "cr") 
+    {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value / 10000).toFixed(2); }
+                    }
+        }
+    }
+}
+</script>
+
+
+<!---- INITIAL VALUES ---->
+<script>
+var data = [
+
+['','April',735573.76,660251,,,97.4,95.84],
+['','May',858169.38,784048.07,,,98.43,98.87],
+['','June',776438.97,949110.82,,,92.41,94.32],
+['','July',899034.59,907845.13,,,105.78,101.73],
+['','August',817304.17,825313.75,,,98.65,102.67],
+['','TOTAL',4086520.87,4126568.77,,,98.56,96.32]
+
+];
+
+function setFullValue() {
+
+    var table = document.getElementById("dataTable");
+
+    // Loop through data array
+    for (var i = 0; i < data.length; i++) {
+        for (var j = 0; j < data[i].length; j++) {
+            var cell = table.rows[i+1].cells[j];
+
+                       
+            		{   cell.innerHTML = (data[i][j]); }
+        }
+	table.rows[i+1].cells[2].style.fontSize = "14px";
+	table.rows[i+1].cells[4].style.fontSize = "14px";
+	table.rows[i+1].cells[5].style.fontSize = "14px";
+	table.rows[i+1].cells[6].style.fontSize = "14px";
+	table.rows[i+1].cells[7].style.fontSize = "14px";
+	table.rows[i+1].cells[3].style.fontSize = "18px";
+    }
+}
+</script>
+
+<script>
+function onLoadSetting()
+   {
+
+     setFullValue();
+//Set Figures to Crores
+    var action = document.getElementById("RsUnit").value;
+    var table = document.getElementById("dataTable");
+
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value / 10000).toFixed(2); }
+                    }
+		            	var roCell = table.rows[i].cells[1]; // old premium column
+            			var boName = roCell.innerHTML;
+
+
+
+                table.rows[i].cells[8].innerHTML = '<a href="dept.html?' + 'name=' + boName + '">Dept</a>';;
+                table.rows[i].cells[9].innerHTML = '<a href="prod.html?' + 'name=' + boName + '">Prod</a>';
+                table.rows[i].cells[10].innerHTML = '<a href="channel.html?' + 'name=' + boName + '">Channel</a>';;
+                table.rows[i].cells[10].innerHTML = '<a href="devoff.html?' + 'name=' + boName + '">Dev Officer</a>';;
+                table.rows[i].cells[11].innerHTML = '<a href="agent.html?' + 'name=' + boName + '">Agent</a>';;
+                table.rows[i].cells[12].innerHTML = '<a href="source.html?' + 'name=' + boName + '">Source</a>';;
+ 
+        }
+
+    for (var i = 2; i < 17; i++) 
+    {
+    centerAlignColumn(i);
+    }
+    centerAlignColumn(0);
+    setDecimal();
+    setCalculatedColumns();
+    setNegativeColorCode();
+   }
+
+
+function setTableValues()
+  {
+     setFullValue();
+     setDeptValue();
+     setToMonthValue();
+     setToChannelValue();
+     setToSourceValue();
+     setPolicyValue();
+     setRsValue();
+     setBGcolors();
+     setDecimal();
+     setCalculatedColumns();
+     setNegativeColorCode();
+
+  }
+</script>
+
+<script>
+    function setToSourceValue()
+   {
+    var action = document.getElementById("source").value;
+    var table = document.getElementById("dataTable");
+  
+//OFFICE
+     if ( action === "office")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.80).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.80).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.7981).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 3.91).toFixed(2); }
+                    }
+
+        }
+        }
+//PORTAL
+     if ( action === "portal")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.07).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.07).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0704).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 3.23).toFixed(2); }
+                    }
+
+        }
+        }
+
+//POLICY BAZAR
+     if ( action === "polbazar")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.04).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.04).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0404).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 4.21).toFixed(2); }
+                    }
+
+        }
+        }
+//MARUTI
+     if ( action === "maruti")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.06).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.06).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0592).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 9.69).toFixed(2); }
+                    }
+
+        }
+        }
+//TATA
+     if ( action === "tata")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.03).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.03).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0303).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 3.98).toFixed(2); }
+                    }
+
+        }
+        }
+
+
+   }
+
+</script>
+
+
+
+<script>
+    function setToChannelValue()
+   {
+    var action = document.getElementById("channel").value;
+    var table = document.getElementById("dataTable");
+  
+//CHANNEL
+     if ( action === "direct")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.11).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.1097).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 1.95).toFixed(2); }
+                    }
+
+        }
+        }
+
+     if ( action === "devsrc")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.21).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.204).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 2.95).toFixed(2); }
+                    }
+
+        }
+        }
+
+
+
+     if ( action === "broker")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.40).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.40).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.402).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 2.95).toFixed(2); }
+                    }
+
+        }
+        }
+//AGENT
+     if ( action === "agent")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.55).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.55).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.5505).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 1.23).toFixed(2); }
+                    }
+
+        }
+        }
+
+//POS
+     if ( action === "pos")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.05).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.05).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.0501).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 1.23).toFixed(2); }
+                    }
+
+        }
+        }
+
+
+   }
+
+</script>
+
+
+
+
+<script>
+    function setToMonthValue()
+   {
+    var action = document.getElementById("toMonth").value;
+    var table = document.getElementById("dataTable");
+  
+//APRIL
+     if ( action === "apr")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.16).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.16).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.1602).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 2.95).toFixed(2); }
+                    }
+
+        }
+        }
+//MAY
+     if ( action === "may")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.37).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.37).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.3693).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 1.23).toFixed(2); }
+                    }
+
+        }
+        }
+
+//JUNE
+     if ( action === "jun")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.61).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.61).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.6093).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value + 1.23).toFixed(2); }
+                    }
+
+        }
+        }
+//JULY
+     if ( action === "jul")
+        {
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [2, 3]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			//if (!isNaN(value)) { cell.innerHTML = (value * 0.83).toFixed(2); }
+                                if (col == 2)
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.83).toFixed(2); }}
+                                else
+                                      {if (!isNaN(value)) { cell.innerHTML = (value * 0.8306).toFixed(2); }}
+
+                    }
+                for (var col of [6, 7]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value - 2.49).toFixed(2); }
+                    }
+
+        }
+        }
+
+
+   }
+
+</script>
+
+    <script>
+        // Object containing LOVs for second dropdown based on first dropdown selection
+        const optionsMap = {
+            all:   ["All Policies"],
+            fire:   ["All Policies","Std Fire", "Fire LOP","Long Term Fire"],
+            motor:   ["All Policies","Motor OD", "Motor TP","Goods Carry.","Pass Carrying","Spl Vehicle","Pvt Car","2-Wheeler"],
+            marine: ["All Policies","Cargo", "Hull","Inland Trns","Foreign Trn","Open Policy"],
+            health: ["All Policies","Mediclaim","Cancer Policy", "Group Policy","Med.Top-up"],
+            misc: ["All Policies","Rural","Liability","House Holders","Shopkeepers","Doctors Ind.","Travel Ins","Sports Ins","Prof.Ind.","Engg","Sp.Cont.Pol"]
+        };
+
+        function setPolicyDropDown() {
+
+            const firstValue = document.getElementById("dept").value;
+            const secondDropdown = document.getElementById("policy");
+
+            // Clear old options
+            secondDropdown.innerHTML = "All Policies";
+
+            if (firstValue) {
+                // Add new options from the optionsMap
+                optionsMap[firstValue].forEach(function(item) {
+                    let option = document.createElement("option");
+                    option.value = item;
+                    option.text = item;
+                    secondDropdown.add(option);
+                });
+            }
+          setTableValues();
+        }
+    </script>
+
+
+<script>
+	function setBGcolors()
+    		{
+			document.getElementById("cellDept").style.backgroundColor = "lightblue";
+			document.getElementById("cellPolicy").style.backgroundColor = "lightblue";
+			document.getElementById("cellRsUnit").style.backgroundColor = "lightblue";
+			document.getElementById("cellToMonth").style.backgroundColor = "lightblue";
+			document.getElementById("cellChannel").style.backgroundColor = "lightblue";
+			document.getElementById("cellSource").style.backgroundColor = "lightblue";
+
+    			if (document.getElementById("dept").value === "all") 
+    				{  document.getElementById("cellDept").style.backgroundColor = "#ff9933";}
+    			if (document.getElementById("policy").value === "All Policies" ||
+                            document.getElementById("policy").value === "all") 
+    				{  document.getElementById("cellPolicy").style.backgroundColor = "#ff9933";}
+    			if (document.getElementById("RsUnit").value === "cr") 
+    				{  document.getElementById("cellRsUnit").style.backgroundColor = "#ff9933";}
+    			if (document.getElementById("toMonth").value === "aug") 
+    				{  document.getElementById("cellToMonth").style.backgroundColor = "#ff9933";}
+    			if (document.getElementById("channel").value === "all") 
+    				{  document.getElementById("cellChannel").style.backgroundColor = "#ff9933";}
+    			if (document.getElementById("source").value === "all") 
+    				{  document.getElementById("cellSource").style.backgroundColor = "#ff9933";}
+		}
+</script>
+
+
+<script>
+function downloadPart() {
+    let table = document.getElementById("dataTable");
+    let rows = table.rows;
+
+    let csv = "";
+        let cols = rows[0].cells;
+        let rowData = [];
+            rowData.push("% Share","Month","Prem 24-25","Prem 25-26","Accretion","Growth %-age","ICR 24-25","ICR 25-26") ;
+        csv += rowData.join(",") + "\n";
+
+    for (let i = 1; i < rows.length; i++) { // start from 1 to skip header
+        let cols = rows[i].cells;
+        let rowData = [];
+        for (let j = 0; j < 8; j++) {
+            rowData.push(cols[j].innerText);
+        }
+        csv += rowData.join(",") + "\n";
+    }
+
+    // Create downloadable file
+    let blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    let link = document.createElement("a");
+    let url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "Month-wise Premium.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+<script>
+function centerAlignColumn(colIndex) {
+  let table = document.getElementById("dataTable");
+
+  // Loop through all rows
+  for (let row of table.rows) {
+    if (row.cells[colIndex]) {
+      row.cells[colIndex].style.textAlign = "center";
+    }
+  }
+}
+</script>
+
+<script>
+     function setDecimal()
+     {
+        var table = document.getElementById("dataTable");
+
+        for (var i = 1; i < table.rows.length; i++) 
+        { // skip header
+         
+                for (var col of [5]) 
+                    {
+		            	var cell = table.rows[i].cells[col]; // old premium column
+            			var value = parseFloat(cell.innerHTML);
+            			if (!isNaN(value)) { cell.innerHTML = (value).toFixed(2); }
+                    }
+         }
+     }
+</script>
+
+
+<script>
+
+	function setNegativeColorCode()
+            {
+
+    	      let table = document.getElementById("dataTable");
+    	      let columnIndex = 4;
+
+              for (var i = 1; i < table.rows.length-1; i++) 
+  		 { 
+          		let cell1 = table.rows[i].cells[4];
+          		let cell2 = table.rows[i].cells[5];
+          		let value1 = parseFloat(cell1.innerText);
+          		let value2 = parseFloat(cell2.innerText);
+
+        		if (value1 < 0 ) {
+            					cell1.style.color = "red";
+        				} 
+					else {  
+             					cell1.style.color = "black";
+        				}
+
+        		if (value2 < 0 ) {
+            					cell2.style.color = "red";
+        				} 
+					else {  
+             					cell2.style.color = "black";
+        				}
+ 
+
+
+    		}
+
+            }
+</script>
+
+<script>
+        function setCalculatedColumns()
+             {
+
+                let table = document.getElementById("dataTable");
+            	var totalCell = table.rows[table.rows.length-1].cells[3]; // old premium column
+		var totalPremium = parseFloat(totalCell.innerHTML);
+
+        	for (var i = 1; i < table.rows.length; i++) 
+        	{ 
+         
+		            	var oldCell = table.rows[i].cells[2]; // old premium column
+            			var oldPremium = parseFloat(oldCell.innerHTML);
+
+		            	var newCell = table.rows[i].cells[3]; // old premium column
+            			var newPremium = parseFloat(newCell.innerHTML);
+
+
+		            	var accrCell = table.rows[i].cells[4]; // old premium column
+            			if (!isNaN(oldPremium)) { accrCell.innerHTML = (newPremium - oldPremium).toFixed(2); }
+
+		            	var growthCell = table.rows[i].cells[5]; // old premium column
+            			if (!isNaN(oldPremium)) { growthCell.innerHTML = ((newPremium - oldPremium)*100/oldPremium).toFixed(2); 
+
+		            	var percCell = table.rows[i].cells[0]; // old premium column
+            			{ percCell.innerHTML = (newPremium * 100 / totalPremium).toFixed(2); }
+
+                 }
+              }
+
+             }
+</script>
+<script>
+function openGraphPage() {
+    let table = document.getElementById("dataTable");
+    let labels = [];
+    let oldPremiumData = [];
+    let currentPremiumData = [];
+
+    // Extract table data
+    for (let i = 1; i < table.rows.length-1; i++) {
+        labels.push(table.rows[i].cells[1].innerText);
+        oldPremiumData.push(parseFloat(table.rows[i].cells[2].innerText));
+        currentPremiumData.push(parseFloat(table.rows[i].cells[3].innerText));
+    }
+
+    // Store in localStorage
+    localStorage.setItem("tableLabels", JSON.stringify(labels));
+    localStorage.setItem("tableoldPremium", JSON.stringify(oldPremiumData));
+    localStorage.setItem("tablecurrentPremium", JSON.stringify(currentPremiumData));
+
+    let table1 = document.getElementById("captionTable");
+    var captionCell = table1.rows[0].cells[1];
+    var roName = captionCell.innerHTML;
+    // Open new page
+           window.open("graph.html?"+ 'name=' + roName + '&unit=' + document.getElementById("RsUnit").value, "_self");
+}
+</script>
+    <script>
+        function makePieChart() {
+            let table = document.getElementById("dataTable");
+            let categories = [];
+            let values = [];
+
+            for (let i = 1; i < table.rows.length-1; i++) { // Skip header
+                categories.push(table.rows[i].cells[1].innerText); // 2nd column
+                values.push(parseFloat(table.rows[i].cells[2].innerText)); // 3rd column
+            }
+
+            // Save data to localStorage
+            localStorage.setItem("chartCategories", JSON.stringify(categories));
+            localStorage.setItem("chartValues", JSON.stringify(values));
+
+
+	    let table1 = document.getElementById("captionTable");
+            var captionCell = table1.rows[0].cells[1];
+            var roName = captionCell.innerHTML;
+           // Open new page
+           window.open("chart.html?"+ 'name=' + roName + '&unit=' + document.getElementById("RsUnit").value, "_self");
+
+        }
+    </script>
+<script>
+     function goBackAndRefresh()
+	 {
+		sessionStorage.setItem('forceReloadPrev', '1');
+		history.go(-1);
+	 }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Graph Page</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+</head>
+
+  <style>
+    /* Center the canvas horizontally */
+    .chart-container {
+      display: flex;
+      justify-content: center; /* centers horizontally */
+      margin-top: 1px;
+    }
+    canvas {
+      width : 80%;
+      /*max-width: 500px;  optional size limit */
+    }
+	
+	@media print {
+      .no-print {
+        display: none !important;
+      }
+    }	
+	
+  </style>
+
+
+<body>
+
+
+<center>
+<img class="no-print" src="NIA Logo.png" alt="description" align="center" width=100%>
+</center>
+
+<table id="captionTable" style="width:100%; border-collapse:collapse; text-align:center;">
+  <tr>
+    <td class = "no-print" style="width:20%;text-align:left;background-color: white;font-size:10px;">Hover mouse cursor over <br>graph to see exact figures</td>
+    <td id="reportName" style="width:50%;font-size:18px;font-weight: bold; font-family: Arial, sans-serif;text-align:center;">caption will come here</td>
+    <td class = "no-print" style="width:30%;text-align:center;">
+	      <img onclick="goBackAndRefresh()" src="Back.png" alt="Excel" style="cursor: pointer;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	      <img onclick="document.location='RO.html'" src="Home.png" alt="Excel" style="cursor: pointer;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	      <img onclick="window.print()" src="Print.png" alt="Print" style="cursor: pointer;">
+	</td>
+  </tr>
+</table>
+
+<script>
+// Function to get query parameter by name
+function getQueryParam(name) {
+    let urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name); // returns value or null
+}
+
+function getQueryParam2(unit) {
+    let urlParams = new URLSearchParams(window.location.search);
+    let rsUnit = urlParams.get(unit); // returns value or null  
+
+switch (rsUnit) {
+        case "th":
+            return "Thousands";
+        case "lk":
+            return "Lakhs";
+        default:
+            return "Crores";
+    }
+
+    
+}
+
+// Get variables from URL
+let roName = getQueryParam("name");
+let rsUnit = getQueryParam2("unit");
+
+
+// Use them in innerHTML
+document.getElementById("reportName").innerHTML = "<br>" + roName.slice(0, -2) + " (₹ in " + rsUnit + ")<br>";
+</script>
+
+
+<div id="divChart" style="width: 65%;  margin: auto;">
+  <canvas id="barChart"></canvas>
+</div>
+
+<script>
+// Get data from localStorage
+let labels = JSON.parse(localStorage.getItem("tableLabels"));
+let oldPremiumData = JSON.parse(localStorage.getItem("tableoldPremium"));
+let currentPremiumData = JSON.parse(localStorage.getItem("tablecurrentPremium"));
+
+// Draw chart
+new Chart(document.getElementById("barChart"), {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: "2024-25     and ",
+                data: oldPremiumData,
+                backgroundColor: "#ddf7da",
+                borderColor: "green",
+                borderWidth: 1
+            },
+            {
+                label: "2025-26   <----Click on these Color Codes to Hide the respective bars",
+                data: currentPremiumData,
+                backgroundColor: "green",
+                borderColor: "red",
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+
+
+});
+</script>
+<script>
+     function goBackAndRefresh()
+	 {
+		sessionStorage.setItem('forceReloadPrev', '1');
+		history.go(-1);
+	 }
+</script>
+</body>
+</html>
