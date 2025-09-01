@@ -91,10 +91,33 @@
     nav ul li ul li:hover > ul {
       display: block;
     }
+
+ .custom-alert {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: red;
+      border: 2px solid #444;
+      padding: 20px;
+      width: 300px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 9999;
+    }
+    .custom-alert h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      color: #333;
+    }
+    .custom-alert button {
+      margin-top: 10px;
+      padding: 5px 10px;
+    }
+
   </style>
 </head>
-<body>
-
+<body onload="showCustomAlert()">
   <nav>
     <ul>
       <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
@@ -134,8 +157,8 @@
       <div class="slide"><img src="NIA 2.jpg" alt="Slide 2"></div>
       <div class="slide"><img src="NIA 3.jpg" alt="Slide 3"></div>
       <div class="slide"><img src="NIA 4.png" alt="Slide 4"></div>
-      <div class="slide"><img src="NIA 5.png" alt="Slide 4"></div>
-      <div class="slide"><img src="NIA 6.png" alt="Slide 4"></div>
+      <div class="slide"><img src="NIA 5.png" alt="Slide 5"></div>
+      <div class="slide"><img src="NIA 6.png" alt="Slide 6"></div>
     </div>
     <div class="controls">
       <button class="btn" id="prev">&#10094;</button>
@@ -181,6 +204,35 @@
 
     showSlide(0);
   </script>
+<script>
+
+    function detectDevice() {
+
+      let ua = navigator.userAgent.toLowerCase();
+
+      if (/mobile|android|iphone|ipad|ipod|blackberry|iemobile|opera mini/.test(ua)) {
+        //document.getElementById("result").innerText = "You are using a Mobile Device 📱";
+		alert ("You are running the website on Mobile phone 📱 \n For better views, use portrait mode");
+      } else {
+		alert ("You are running the website on Computer 📱 \n It is OK");
+       // document.getElementById("result").innerText = "You are using a Computer 💻";
+      }
+    }
+
+  </script>
+
+<script>
+  function showCustomAlert() {
+  
+      let ua = navigator.userAgent.toLowerCase();
+      if (/mobile|android|iphone|ipad|ipod|blackberry|iemobile|opera mini/.test(ua)) {
+	  if (window.matchMedia("(orientation: portrait)").matches) {
+	  alert("You are opening the website in a mobile device. For better experience, we recommend viewing in Landscaope Mode");
+	  }
+      }  
+  }
+
+</script>
 
 </body>
 </html>
