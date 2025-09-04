@@ -1929,32 +1929,26 @@ function openGraphPage() {
 </script>
 
 
-    <script>
-        function makePieChart() {
-            let table = document.getElementById("dataTable");
-            let categories = [];
-            let values = [];
+  <script>
+    function makePieChart() {
+      let table = document.getElementById("dataTable");
+      let labels = [];
+      let values = [];
 
-            for (let i = 1; i < table.rows.length-1; i++) { // Skip header
-                categories.push(table.rows[i].cells[1].innerText); // 2nd column
-                values.push(parseFloat(table.rows[i].cells[2].innerText)); // 3rd column
-            }
+      for (let i = 1; i < table.rows.length - 1; i++) { // skip first and last row
+        labels.push(table.rows[i].cells[1].innerText);
+        values.push(parseFloat(table.rows[i].cells[3].innerText));
+      }
 
-            // Save data to localStorage
-            localStorage.setItem("chartCategories", JSON.stringify(categories));
-            localStorage.setItem("chartValues", JSON.stringify(values));
-
-
+      localStorage.setItem("chartLabels", JSON.stringify(labels));
+      localStorage.setItem("chartValues", JSON.stringify(values));
 	    let table1 = document.getElementById("captionTable");
             var captionCell = table1.rows[0].cells[1];
             var roName = captionCell.innerHTML;
 
-
-           // Open new page
            window.open("chart.html?"+ 'name=' + roName + '&unit=' + document.getElementById("RsUnit").value, "_self");
-
-        }
-    </script>
+    }
+  </script>
 <script>
      function goBackAndRefresh()
 	 {
