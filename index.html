@@ -56,7 +56,7 @@
     }
 
     nav ul li a:hover {
-      background: #444;
+      background: red; /* #444; */
     }
 
     /* First-level dropdown */
@@ -78,7 +78,7 @@
     }
 
     nav ul li ul li a:hover {
-      background: #555;
+      background: red; /*#555;*/
     }
 
     /* Second-level dropdown */
@@ -120,11 +120,10 @@
 <body onload="showCustomAlert()">
 
 
-<!-- hitwebcounter Code START -->
+<!-- hitwebcounter Code START
 <a href="https://www.hitwebcounter.com/convert-pdf-to-word" target="_blank">
 <img src="https://hitwebcounter.com/counter/counter.php?page=21436492&style=0001&nbdigits=5&type=page&initCount=0" title="PDF Converters" Alt=" PDF Convertors"   border="0" /></a>                                    
-
-
+---->
 
   <nav>
     <ul>
@@ -132,14 +131,20 @@
       <li>
         <a href="#">Marketing ▾</a>
         <ul>
-          <li><a href="RO.html">Premium Dashboard</a></li>
-          <li><a href="#">Claims Dashboard</a></li>
+          <li>
+		     <a href="#">Premium Dashboard</a>
+            <ul>
+              <li><a href="RO.html">One-D Reports</a></li>
+              <li><a href="#" onclick="blockedMenu('2-D Reports')">Two-D Reports</a></li>
+            </ul>
+		  </li>
+          <li><a href="#" onclick="blockedMenu('Claims Dashboard')">Claims Dashboard</a></li>
           <li>
             <a href="#">Special Report ▸</a>
             <ul>
-              <li><a href="#">Marketing Meet</a></li>
-              <li><a href="#">Accounts Meet</a></li>
-              <li><a href="#">Others</a></li>
+              <li><a href="#"  onclick="blockedMenu('Marketing Meet')">Marketing Meet</a></li>
+              <li><a href="#" onclick="blockedMenu('Accounts Meet')">Accounts Meet</a></li>
+              <li><a href="#" onclick="blockedMenu('Others')">Others</a></li>
             </ul>
           </li>
         </ul>
@@ -147,14 +152,14 @@
       <li>
         <a href="#">Fraud Analytics ▾</a>
         <ul>
-          <li><a href="#">Health Claims</a></li>
+          <li><a href="#" onclick="blockedMenu('Health Claim Analysis')">Health Claims</a></li>
           <li>
-            <a href="#">Motor TP Claims</a>
+            <a href="#" onclick="blockedMenu('Motor TP Claims')">Motor TP Claims</a>
           </li>
         </ul>
       </li>
       <li><a href="https://newindia.co.in" target="_blank">Visit Us</a></li>
-      <li><a href="#">Contact</a></li>
+      <li><a href="#" onclick="blockedMenu('Contacts')">Contact</a></li>
     </ul>
   </nav>
 
@@ -240,8 +245,13 @@
 	  }
       }  
   }
-
 </script>
 
+<script>
+      function blockedMenu(menuName)
+	       {
+		      alert(menuName + " webpage is private. It is hidden from public domain. Currently, only One-Dimensional Premium Reports are available.");
+		   }
+</script>
 </body>
 </html>
